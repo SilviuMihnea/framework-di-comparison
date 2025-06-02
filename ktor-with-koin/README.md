@@ -84,8 +84,8 @@ class ApplicationTest : StringSpec(
                             baseAppModule(),
                             module {
                                 single<IdGenerator> { 
-                                    IdGenerator { 
-                                        UUID.fromString("03403403-4034-453e-b564-193a706dbaa8") // stub
+                                    IdGenerator { // fun interface
+                                        UUID.fromString("03403403-4034-453e-b564-193a706dbaa8") 
                                     } 
                                 }
                             } 
@@ -111,3 +111,5 @@ class ApplicationTest : StringSpec(
 ```
 
 ## Closing components when application ends
+
+## Single, Factory, Scoped

@@ -7,7 +7,6 @@ import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import java.util.UUID
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -16,25 +15,6 @@ fun main(args: Array<String>) {
 fun Application.module() {
     configureFrameworks()
     configureRouting()
-}
-
-fun interface IdGenerator {
-    fun generate(): UUID
-}
-
-class DefaultIdGenerator() : IdGenerator {
-    override fun generate(): UUID {
-        return UUID.randomUUID()
-    }
-}
-
-class UserRepository(
-    private val idGenerator: IdGenerator
-) {
-    fun createUser(name: String) {
-        val id = idGenerator.generate()
-        println("Creating $name with $id")
-    }
 }
 
 
@@ -47,10 +27,7 @@ fun Application.configureFrameworks() {
     install(Koin) {
         slf4jLogger()
         modules(
-            module {
-                single<IdGenerator> { DefaultIdGenerator() }
-                single<UserRepository> { UserRepository(get()) }
-            }
+            baseAppModule()
         )
     }
 }

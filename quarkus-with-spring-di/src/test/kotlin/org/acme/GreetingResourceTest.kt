@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test
 @QuarkusTest
 class GreetingResourceTest {
 
-    lateinit var
-
     @Test
     fun testHelloEndpoint() {
         given()

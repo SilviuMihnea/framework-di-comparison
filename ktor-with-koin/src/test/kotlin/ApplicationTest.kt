@@ -3,6 +3,7 @@ import com.example.baseAppModule
 import com.example.configureRouting
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.core.spec.style.Test
+import io.kotest.matchers.equality.CompareResult.Companion.single
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -11,6 +12,7 @@ import io.ktor.server.application.*
 import io.ktor.server.testing.*
 import io.mockk.every
 import io.mockk.mockk
+import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import java.util.*
 
@@ -24,10 +26,10 @@ class ApplicationTest : StringSpec(
                     install(Koin) {
                         modules(
                             baseAppModule(),
-                            org.koin.dsl.module {
+                            module {
                                 single<IdGenerator> {
                                     mockk {
-                                        every { generate() } returns UUID.randomUUID()
+                                        every { generate() } returns UUID.fromString("11e1e111-e111-1e11-ee11-1e11e11e11ee")
                                     }
                                 }
                             }
