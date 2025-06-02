@@ -2,6 +2,9 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
+    kotlin("kapt") version "1.7.20"
+    // alias(libs.plugins.ksp)
+    // id("com.google.dagger") version libs.versions.dagger
 }
 
 group = "com.example"
@@ -18,9 +21,14 @@ repositories {
 dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.config.yaml)
+    implementation(libs.dagger)
+    //ksp(libs.dagger.compiler)
+    kapt(libs.dagger.compiler)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }
