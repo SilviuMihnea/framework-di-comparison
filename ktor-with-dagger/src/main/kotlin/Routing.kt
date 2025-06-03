@@ -14,14 +14,10 @@ fun Application.configureRouting() {
             call.respondText("Hello World!")
         }
 
-        route("/users") {
+        route("/order") {
             post {
-                val user = call.receive<UserModel>()
-                if(false) {
-                    call.respond(HttpStatusCode.Created)
-                } else {
-                    call.respond(HttpStatusCode.InternalServerError)
-                }
+                // val orderRepository: AppComponent = DaggerAppComponent.create().orderRepository()
+                call.respondText("Hello World!")
             }
         }
     }
