@@ -26,7 +26,7 @@ interface NotificationService {
     suspend fun notify(topic: String, message: String)
 }
 
-interface Notifier // some dependency for the pur implementation
+interface Notifier // some dependency for the implementation
 
 class DefaultNotificationService(
     val notifier: Notifier
