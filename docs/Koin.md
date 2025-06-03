@@ -73,15 +73,15 @@ And this is how we use scopes:
 ```kotlin
 val scope = call.getKoin().createScope<RequestScope>()
 val orderRepository = scope.get<OrderRepository>()
-val qrRepository = scope.get<QRRepository>()```
+val qrRepository = scope.get<QRRepository>()
 ```
 
 There is no support for injecting dependencies in classes. We have to specifically inject them in extension  methods of the Ktor `Application` class.
 
 ## Testing
 
-For testing, we add a second module that adds overrides for some of the components. \\
-Koin will use the overrides for instantiating the dependents. \\
+For testing, we add a second module that adds overrides for some of the components. \
+Koin will use the overrides for instantiating the dependents. \
 We can keep the base app module to keep the dependencies between components.
 
 ```kotlin
