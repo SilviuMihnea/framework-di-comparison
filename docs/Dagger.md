@@ -27,7 +27,7 @@ interface NotificationService {
     suspend fun notify(topic: String, message: String)
 }
 
-interface Notifier // some dependency for the pur implementation
+interface Notifier // some dependency for the implementation
 
 class DefaultNotificationService(
     val notifier: Notifier
@@ -161,9 +161,7 @@ val qrRepository = scopeComponent.qrRepository()
 
 ## Testing
 
-For testing, we add a second module that adds overrides for some of the components. \\
-Koin will use the overrides for instantiating the dependents. \\
-We can keep the base app module to keep the dependencies between components.
+For testing, we add a fake module or a fake component.
 
 ```kotlin
 fun Application.configureRouting() {
