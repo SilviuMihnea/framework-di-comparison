@@ -38,7 +38,6 @@ classDiagram
 
     class QR
     class QRGenerator
-    QRGenerator --> QR
 
     class Notifier
     <<interface>> Notifier
