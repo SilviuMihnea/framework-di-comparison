@@ -49,6 +49,10 @@ val handlerModule = module {
     // other use cases: auth http client and no-auth http client or different http clients bor different services
 }
 
+val compositeModule = module {
+    includes(notificationModule, handlerModule)
+}
+
 
 fun Application.configureFrameworks() {
     install(Koin) {
