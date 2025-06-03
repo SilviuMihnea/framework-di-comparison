@@ -1,9 +1,7 @@
-import com.example.IdGenerator
-import com.example.baseAppModule
-import com.example.configureRouting
+import com.example.*
+import com.example.business.utility.IdGenerator
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.core.spec.style.Test
-import io.kotest.matchers.equality.CompareResult.Companion.single
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -25,7 +23,10 @@ class ApplicationTest : StringSpec(
                     configureRouting()
                     install(Koin) {
                         modules(
-                            baseAppModule(),
+                            dbModule,
+                            utilityModule,
+                            notificationModule,
+                            handlerModule,
                             module {
                                 single<IdGenerator> {
                                     mockk {
@@ -37,9 +38,9 @@ class ApplicationTest : StringSpec(
                     }
                 }
 
-                val response = client.get("/?name=John")
+                val response = client.get("/")
                 response.status shouldBe HttpStatusCode.OK
-                response.bodyAsText() shouldBe "Hello John!"
+                response.bodyAsText() shouldBe "Hello 11e1e111-e111-1e11-ee11-1e11e11e11ee!"
             }
         }
     }
