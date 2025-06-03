@@ -1,15 +1,15 @@
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ktor)
-    alias(libs.plugins.ksp)
+    // alias(libs.plugins.ktor)
+    kotlin("kapt") version "1.7.20"
+    id("io.ktor.plugin") version "2.1.2"
 }
 
 group = "com.example"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 repositories {
@@ -24,8 +24,10 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.config.yaml)
+
     implementation(libs.dagger)
-    ksp(libs.dagger.compiler)
+    kapt(libs.dagger.compiler)
+
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }

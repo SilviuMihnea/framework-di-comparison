@@ -59,6 +59,11 @@ class NotificationModule {
             // implement methods if needed
         }
     }
+
+    @Provides
+    fun notificationService(notifier: Notifier): NotificationService {
+        return DefaultNotificationService(notifier)
+    }
 }
 
 @Module

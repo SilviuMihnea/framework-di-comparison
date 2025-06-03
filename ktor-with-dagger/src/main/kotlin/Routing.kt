@@ -7,7 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
-
+    val idGenerator = DaggerAppScopeComponent.create().idGenerator()
 
     routing {
         get("/") {
@@ -16,7 +16,9 @@ fun Application.configureRouting() {
 
         route("/order") {
             post {
-                // val orderRepository: AppComponent = DaggerAppComponent.create().orderRepository()
+                val scopeComponent = DaggerRequestScopeComponent.create()
+                val orderRepository = scopeComponent.orderRepository()
+                val qrRepository = scopeComponent.qrRepository()
                 call.respondText("Hello World!")
             }
         }
