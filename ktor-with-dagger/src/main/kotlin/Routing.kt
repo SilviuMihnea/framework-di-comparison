@@ -11,7 +11,7 @@ fun Application.configureRouting() {
 
     routing {
         get("/") {
-            call.respondText("Hello World!")
+            call.respondText("Hello ${idGenerator.generate()}!")
         }
 
         route("/order") {

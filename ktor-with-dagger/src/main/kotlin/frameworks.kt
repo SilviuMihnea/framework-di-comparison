@@ -10,6 +10,7 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import javax.inject.Qualifier
+import javax.inject.Scope
 import javax.inject.Singleton
 
 @Qualifier
@@ -101,7 +102,11 @@ interface RequestScopeComponent {
     fun qrRepository(): QRRepository
 }
 
-@Singleton
+@Scope
+@Retention(AnnotationRetention.RUNTIME)
+annotation class RequestScope
+
+@RequestScope
 @Component(
     modules = [
         NotificationModule::class,

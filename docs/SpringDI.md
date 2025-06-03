@@ -1,92 +1,155 @@
 # Spring DI
 
-## Configuration
+This example demonstrates how to use **Spring DI** for dependency injection in a Kotlin-Quarkus project.
 
-First, let's put all the real dependencies in a single module which we will override as needed.
+## Setup
+
+After creating a project with <https://code.quarkus.io/>, you can add in the CLI:
+
+```
+quarkus extension add spring-di
+```
+  
+## Defining components
+
+Following interface based style, we will declare an interface than an implementation
 
 ```kotlin
-fun Application.baseAppModule() = module {
-    single<IdGenerator> { DefaultIdGenerator() }
-    single<UserRepository> { UserRepository(get()) } // injecting in constructor
+interface NotificationService {
+    suspend fun notify(topic: String, message: String)
+}
+
+interface Notifier // some dependency for the pur implementation
+
+@Service // <-- Spring specific
+class DefaultNotificationService(
+    val notifier: Notifier
+) : NotificationService {
+    override suspend fun notify(topic: String, message: String) {
+        // empty
+    }
 }
 ```
 
-Then, we use that module in configuring Koin.
+As usual, in Spring, we don't need to create any additional modules or components.
+
+In case we don't have access to the said class we wish for a component, we can create a configuration class:
 
 ```kotlin
-fun Application.configureFrameworks() {
-    install(Koin) {
-        slf4jLogger()
-        modules(
-            baseAppModule()
-        )
+@Configuration
+class UtilityConfig {
+    @Bean
+    fun idGenerator(): IdGenerator {
+        return DefaultIdGenerator()
+    }
+
+    @Bean
+    fun qrGenerator(): QRGenerator {
+        return QRGenerator { QR() }
     }
 }
 ```
 
 ## Injecting dependencies
 
+The injection method is the Spring default one. Since we work with kotlin which insists on type safety, if we want to use @Autowired on a propriety we have to declare it as lateinit var:
+
 ```kotlin
-fun Application.configureRouting() {
-    val userRepository by inject<UserRepository>() // using inject
-    routing {
-        get("/") {
-            val name = call.queryParameters["name"]
-            if (name != null) {
-                userRepository.createUser(name)
-                call.respondText("Hello $name!")
-            }
-            call.respondText("Hello World!")
-        }
-    }
-}
+@Autowired
+lateinit var notificationService: NotificationService
 ```
+
+Which in turn has to be checked every time we want to use a method.
 
 ## Testing
 
-For testing, we add a second module that adds overrides for some of the components. \\
-Koin will use the overrides for instantiating the dependents. \\
-We can keep the base app module to keep the dependencies between components.
+For testing, it's the easiest from all of them, since we can just use @InjectMock:
 
 ```kotlin
-@Test
-class ApplicationTest : StringSpec(
-    {
-        "should make a request to the app " {
-            testApplication {
-                application {
-                    configureRouting()
-                    install(Koin) {
-                        modules(
-                            baseAppModule(),
-                            module {
-                                single<IdGenerator> { 
-                                    IdGenerator { // fun interface
-                                        UUID.fromString("03403403-4034-453e-b564-193a706dbaa8") 
-                                    } 
-                                }
-                            } 
-                            // --- or --- 
-                            module {
-                                single<IdGenerator> {
-                                    mockk {
-                                        every { generate() } returns UUID.randomUUID()
-                                    }
-                                }
-                            }
-                        )
-                    }
-                }
+@QuarkusTest
+class GreetingResourceTest {
 
-                val response = client.get("/?name=John") // client is coming from testApplication
-                response.status shouldBe HttpStatusCode.OK
-                response.bodyAsText() shouldBe "Hello John!"
-            }
-        }
+    @InjectMock
+    lateinit var notificationService: NotificationService
+
+    @Test
+    fun testHelloEndpoint() {
+        given()
+          .`when`().get("/hello")
+          .then()
+             .statusCode(200)
+             .body(`is`("Hello from Quarkus REST"))
     }
-)
+
+}
 ```
 
-## Closing components when application ends
-
 ## Single, Factory, Scoped
+
+```kotlin
+@Configuration
+class DBConfig {
+    @Bean
+    @Scope(value = "request") // singleton / prototype / request / session / application / websocket
+    fun dbConnection(): DBConnection {
+        return DBConnection()
+    }
+
+    @Bean
+    @Scope(value = "request")
+    fun orderRepository(db: DBConnection): OrderRepository {
+        return DefaultOrderRepository(db)
+    }
+
+    @Bean
+    @Scope(value = "request")
+    fun qrRepository(db: DBConnection): QRRepository {
+        return DefaultQRRepository(db)
+    }
+}
+
+@Configuration
+class UtilityConfig {
+    @Bean
+    fun idGenerator(): IdGenerator {
+        return DefaultIdGenerator()
+    }
+
+    @Bean
+    fun qrGenerator(): QRGenerator {
+        return QRGenerator { QR() }
+    }
+}
+
+@Configuration
+class NotificationConfig {
+    @Bean
+    fun notifier(): Notifier {
+        return object : Notifier {
+            // implement methods if needed
+        }
+    }
+}
+
+@Configuration
+class HandlerConfig {
+    @Bean(name = ["ReadyForPickUpStatusHandler"])
+    fun readyForPickUpStatusHandler(notificationService: NotificationService): StatusHandler {
+        return ReadyForPickUpStatusHandler(notificationService)
+    }
+
+    @Bean(name = ["WarehouseReadyStatusHandler"])
+    fun warehouseReadyStatusHandler(notificationService: NotificationService): StatusHandler {
+        return WarehouseReadyStatusHandler(notificationService)
+    }
+
+    @Bean
+    fun statusHandlerService(
+        @Qualifier("ReadyForPickUpStatusHandler") handler1: StatusHandler,
+        @Qualifier("WarehouseReadyStatusHandler") handler2: StatusHandler
+    ): StatusHandlerService {
+        return StatusHandlerService(listOf(handler1, handler2))
+    }
+}
+
+```

@@ -6,40 +6,77 @@ We'll have a look at the most popular options for dependency injection for Kotli
 - [Dagger](./docs/Dagger.md)
 - [Spring DI](./docs/SpringDI.md)
 
-We have the following "architecture":
+What will document cover:
 
-As a tech stack, I decided to keep as much libraries that we already use:
+- Injection patterns
+- Scopes
+- Lifecycles
+- Compile / Runtime use
+- Testing
 
-- KoTest
-- Mockk
-  
-## Kotlin business code
+Folder structure:
 
-```kotlin
-fun interface IdGenerator {
-    fun generate(): UUID
-}
+![folder structure](./docs/folder-structure.png)
 
-class DefaultIdGenerator(): IdGenerator {
-    override fun generate(): UUID {
-        return UUID.randomUUID()
-    }
-}
+```mermaid
+classDiagram
+    class DBConnection
 
-class UserRepository(
-    private val idGenerator: IdGenerator
-) {
-    fun createUser(name: String) {
-        val id = idGenerator.generate()
-        println("Creating $name with $id")
-    }
-}
+    class OrderRepository
+    <<interface>> OrderRepository
+    OrderRepository <|.. DefaultOrderRepository
+    DefaultOrderRepository --> DBConnection
+
+    class QRRepository
+    <<interface>> QRRepository
+    QRRepository <|.. DefaultQRRepository
+    DefaultQRRepository --> DBConnection
+
+    class IdGenerator
+    <<interface>> IdGenerator
+    IdGenerator <|.. DefaultIdGenerator
+
+    class QR
+    class QRGenerator
+    QRGenerator --> QR
+
+    class Notifier
+    <<interface>> Notifier
+    Notifier <|.. Object
+    class NotificationService
+    <<interface>> NotificationService
+    class DefaultNotificationService
+    NotificationService <|.. DefaultNotificationService
+    DefaultNotificationService --> Notifier
+
+    class StatusHandler
+    <<interface>> StatusHandler
+    StatusHandler <|.. ReadyForPickUpStatusHandler
+    StatusHandler <|.. WarehouseReadyStatusHandler
+    ReadyForPickUpStatusHandler --> NotificationService
+    WarehouseReadyStatusHandler --> NotificationService
+
+    class StatusHandlerService
+    StatusHandlerService "1" --> "*" StatusHandler
 ```
 
 ## Comparison
 
-|Koin|Dagger|SpringDI|
-|:---:|:---:|:---:|
-|Lightweight, no reflection|Requires code generation (KAPT/KSP)||
-|Kotlin idiomatic|Annotation based|Annotation based|
-|Can inject services only in Application|Uses @Component and @Module to group dependencies||
+| Feature                       | Koin             | Quarkus + Spring DI     | Dagger                |
+|-------------------------------|------------------|--------------------------|------------------------|
+| Language                      | __Kotlin__      | Kotlin/Java              | Kotlin/__Java__            |
+| Reflection                    | ⚠️ KClass        | ✅                       | ❌ |
+| Code generation               | ❌                | ❌                       | ✅                     |
+| DI Setup Style                | DSL              | Annotations (`@Service`) | Annotations + Modules + Component  |
+| Test DI Override              | ✅ Easy           | ✅ via `@InjectMock`      | ⚠️ Manual modules      |
+| Best for                      | Quick Kotlin apps| Spring-style microservices | Performance-critical systems |
+| Native image support          | ✅ (via GraalVM)  | ✅ (Quarkus Native)       | ⚠️ (requires configuration) |
+| Configuration          | Works OOTB  | Works OOTB       | Kapt is in maintanance, KSP is in Alpha |
+
+---
+
+## 🔍 TL;DR
+
+- __Use Koin__ if you want simplicity and idiomatic Kotlin DSL.
+- __Use Quarkus + Spring DI__ if you're building microservices with Spring familiarity and want Quarkus features.
+- __Use Dagger__ if you want max performance, compile-time safety, or Android-like DI.

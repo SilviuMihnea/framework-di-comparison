@@ -10,6 +10,7 @@ import io.ktor.server.application.*
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.dsl.onClose
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 
@@ -18,7 +19,7 @@ class TenantScope // different http clients or token providers
 
 val dbModule = module {
     scope<RequestScope> {
-        factory<DBConnection> { DBConnection() }
+        factory<DBConnection> { DBConnection() }.onClose {  }
         factory<OrderRepository> { DefaultOrderRepository(get()) }
         factory<QRRepository> { DefaultQRRepository(get()) }
     }
@@ -30,7 +31,7 @@ val utilityModule = module {
 }
 
 val notificationModule = module {
-    single<Notifier> { object : Notifier {} }
+    single<Notifier> { object : Notifier {} }.onClose {  }
     singleOf(::DefaultNotificationService)
 }
 
